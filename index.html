@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="description" content="Torneio das Guildas dos Magos - Gerencie pontuações de guildas em um torneio de fantasia medieval">
+  <meta name="theme-color" content="#0d0d2b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Torneio das Guildas dos Magos</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=MedievalSharp&family=Cinzel+Decorative:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Magical Particles Background -->
+  <div class="particles" id="particles" aria-hidden="true"></div>
+
+  <!-- =============================== -->
+  <!-- SPLASH SCREEN (Intro Video)     -->
+  <!-- =============================== -->
+  <div class="splash-screen active" id="splashScreen">
+    <video
+      class="splash-video"
+      id="splashVideo"
+      autoplay
+      muted
+      playsinline
+      preload="auto"
+    >
+      <source src="intro.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <!-- =============================== -->
+  <!-- PAGE: MAIN MENU                 -->
+  <!-- =============================== -->
+  <div class="page page-menu" id="pageMenu">
+    <div class="menu-container">
+      <!-- Logo -->
+      <div class="menu-logo-wrapper">
+        <img src="logo.jpg" alt="Torneio das Guildas dos Magos" class="menu-logo" id="menuLogo">
+        <div class="menu-logo-glow"></div>
+      </div>
+
+      <!-- Menu Buttons -->
+      <nav class="menu-nav" id="menuNav">
+        <button class="menu-btn menu-btn-primary" id="btnTorneio" data-page="tournament">
+          <span class="menu-btn-icon">⚔️</span>
+          <span class="menu-btn-content">
+            <span class="menu-btn-title">Torneio das Guildas</span>
+            <span class="menu-btn-subtitle">Gerencie pontuações e ranking</span>
+          </span>
+          <span class="menu-btn-arrow">›</span>
+        </button>
+
+        <button class="menu-btn menu-btn-secondary" id="btnMercado" data-page="market">
+          <span class="menu-btn-icon">🛒</span>
+          <span class="menu-btn-content">
+            <span class="menu-btn-title">Mercado de Power-ups</span>
+            <span class="menu-btn-subtitle">Em breve...</span>
+          </span>
+          <span class="menu-btn-arrow">›</span>
+        </button>
+
+        <button class="menu-btn menu-btn-tertiary" id="btnCreditos" data-page="credits">
+          <span class="menu-btn-icon">📜</span>
+          <span class="menu-btn-content">
+            <span class="menu-btn-title">Créditos</span>
+            <span class="menu-btn-subtitle">Sobre o torneio</span>
+          </span>
+          <span class="menu-btn-arrow">›</span>
+        </button>
+      </nav>
+
+      <!-- Footer tagline and Sponsors -->
+      <div class="menu-footer">
+        <p class="menu-tagline">✦ Que a magia guie os mais sábios ✦</p>
+        <div class="sponsors-container">
+          <img src="sponsor1.png" alt="Patrocinador 1" class="sponsor-logo">
+          <img src="sponsor2.png" alt="Patrocinador 2" class="sponsor-logo">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =============================== -->
+  <!-- PAGE: TOURNAMENT (existing)     -->
+  <!-- =============================== -->
+  <div class="page page-tournament" id="pageTournament">
+    <!-- Back Button -->
+    <button class="back-btn" id="backBtnTournament" data-page="menu">
+      <span class="back-btn-arrow">‹</span>
+      <span>Menu</span>
+    </button>
+
+    <!-- Header -->
+    <header class="header" id="header">
+      <div class="header-ornament top-left">⚜</div>
+      <div class="header-ornament top-right">⚜</div>
+      <div class="header-logo-wrapper">
+        <img src="logo.jpg" alt="Torneio das Guildas dos Magos" class="page-logo">
+      </div>
+      <div class="leader-banner" id="leaderBanner">
+        <span class="leader-icon">🏆</span>
+        <span class="leader-text" id="leaderText">Nenhuma guilda cadastrada</span>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Guild Grid -->
+      <section class="guilds-section" id="guildsSection">
+        <div class="guilds-grid" id="guildsGrid">
+          <!-- Guild cards will be dynamically inserted here -->
+        </div>
+
+        <!-- Add Guild Button -->
+        <button class="add-guild-btn" id="addGuildBtn" title="Adicionar nova guilda">
+          <span class="add-guild-icon">✦</span>
+          <span class="add-guild-text">Invocar Nova Guilda</span>
+        </button>
+      </section>
+
+      <!-- Ranking Section -->
+      <section class="ranking-section" id="rankingSection" style="display: none;">
+        <div class="ranking-header">
+          <span class="ranking-icon">📊</span>
+          <h2 class="ranking-title">Ranking do Torneio</h2>
+        </div>
+        <div class="ranking-scroll">
+          <ol class="ranking-list" id="rankingList">
+            <!-- Ranking items will be dynamically inserted here -->
+          </ol>
+        </div>
+      </section>
+
+      <!-- Reset Button -->
+      <div class="reset-container" id="resetContainer" style="display: none;">
+        <button class="reset-btn" id="resetBtn" title="Resetar todas as pontuações">
+          🔄 Resetar Torneio
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <!-- =============================== -->
+  <!-- PAGE: MARKET (placeholder)      -->
+  <!-- =============================== -->
+  <div class="page page-market" id="pageMarket">
+    <button class="back-btn" id="backBtnMarket" data-page="menu">
+      <span class="back-btn-arrow">‹</span>
+      <span>Menu</span>
+    </button>
+
+    <div class="placeholder-page">
+      <div class="header-logo-wrapper">
+        <img src="logo.jpg" alt="Torneio das Guildas dos Magos" class="page-logo">
+      </div>
+      <div class="placeholder-icon">🛒</div>
+      <h2 class="placeholder-title">Mercado de Power-ups</h2>
+      <p class="placeholder-text">Os artefatos mágicos estão sendo forjados...<br>Em breve disponível!</p>
+      <div class="placeholder-items">
+        <div class="placeholder-item">
+          <span class="placeholder-item-icon">⚡</span>
+          <span class="placeholder-item-name">Dobro de Pontos</span>
+          <span class="placeholder-item-tag">Em breve</span>
+        </div>
+        <div class="placeholder-item">
+          <span class="placeholder-item-icon">🛡️</span>
+          <span class="placeholder-item-name">Escudo Protetor</span>
+          <span class="placeholder-item-tag">Em breve</span>
+        </div>
+        <div class="placeholder-item">
+          <span class="placeholder-item-icon">🔮</span>
+          <span class="placeholder-item-name">Cristal Arcano</span>
+          <span class="placeholder-item-tag">Em breve</span>
+        </div>
+        <div class="placeholder-item">
+          <span class="placeholder-item-icon">💫</span>
+          <span class="placeholder-item-name">Bênção Ancestral</span>
+          <span class="placeholder-item-tag">Em breve</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =============================== -->
+  <!-- PAGE: CREDITS                   -->
+  <!-- =============================== -->
+  <div class="page page-credits" id="pageCredits">
+    <button class="back-btn" id="backBtnCredits" data-page="menu">
+      <span class="back-btn-arrow">‹</span>
+      <span>Menu</span>
+    </button>
+
+    <div class="credits-page">
+      <div class="credits-logo-wrapper">
+        <img src="logo.jpg" alt="Logo" class="credits-logo">
+      </div>
+      <h2 class="credits-title">Torneio das Guildas dos Magos</h2>
+      <div class="credits-divider">✦ ✦ ✦</div>
+      <div class="credits-section">
+        <h3 class="credits-section-title">Sobre</h3>
+        <p class="credits-text">Um sistema interativo para gerenciamento de torneios entre guildas, projetado para tornar competições educacionais e recreativas mais envolventes e mágicas.</p>
+      </div>
+      <div class="credits-section">
+        <h3 class="credits-section-title">Desenvolvimento</h3>
+        <p class="credits-text">Criado com ✨ magia e dedicação</p>
+      </div>
+      <div class="credits-section">
+        <h3 class="credits-section-title">Versão</h3>
+        <p class="credits-text">v2.0 — Edição Arcana</p>
+      </div>
+      <div class="credits-footer">
+        <p>⚔️ Que a honra das guildas prevaleça ⚔️</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Confirm Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-icon">⚠️</span>
+        <h3 class="modal-title" id="modalTitle">Confirmar ação</h3>
+      </div>
+      <p class="modal-message" id="modalMessage">Tem certeza?</p>
+      <div class="modal-buttons">
+        <button class="modal-btn modal-cancel" id="modalCancel">Cancelar</button>
+        <button class="modal-btn modal-confirm" id="modalConfirm">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Score Float Animation Template -->
+  <template id="scoreFloatTemplate">
+    <div class="score-float"></div>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
