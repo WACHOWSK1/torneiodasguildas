@@ -469,19 +469,28 @@ body::after {
   justify-content: center;
   align-items: center;
   gap: var(--spacing-md);
-  margin-top: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(201, 168, 76, 0.15);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(6px);
 }
 
 .sponsor-logo {
-  max-height: 40px;
-  max-width: 120px;
+  max-height: 44px;
+  max-width: 145px;
+  height: auto;
+  width: auto;
   object-fit: contain;
-  opacity: 0.7;
-  transition: opacity var(--transition-fast);
+  opacity: 0.95;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.6));
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
 }
 
-.sponsor-logo:hover {
+.sponsor-logo:hover, .sponsor-logo:active {
   opacity: 1;
+  transform: scale(1.05);
 }
 
 @keyframes subtlePulse {
@@ -649,7 +658,16 @@ body::after {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-align: center;
+  margin-bottom: 4px;
+}
+
+.credits-subtitle {
+  font-family: var(--font-medieval);
+  font-size: 0.85rem;
+  color: var(--purple-light);
+  text-align: center;
   margin-bottom: var(--spacing-md);
+  letter-spacing: 1px;
 }
 
 .credits-divider {
@@ -1636,6 +1654,143 @@ body::after {
 
   .main-content {
     max-width: 900px;
+  }
+}
+
+/* ============================================
+   SMARTPHONE UX & MOBILE-FIRST OPTIMIZATIONS
+   ============================================ */
+
+@media (max-width: 600px) {
+  body {
+    -webkit-text-size-adjust: 100%;
+    touch-action: manipulation;
+  }
+
+  /* Safe area padding for notch smartphones */
+  .back-btn {
+    padding-top: max(12px, env(safe-area-inset-top));
+  }
+
+  .menu-container {
+    padding: 16px 12px 32px;
+    justify-content: flex-start;
+  }
+
+  .menu-logo-wrapper {
+    margin-top: 10px;
+    margin-bottom: 16px;
+  }
+
+  .menu-logo {
+    width: 140px;
+    height: 140px;
+  }
+
+  .menu-btn {
+    padding: 14px 16px;
+    min-height: 58px;
+    touch-action: manipulation;
+  }
+
+  .menu-btn-icon {
+    width: 38px;
+    height: 38px;
+    font-size: 1.4rem;
+  }
+
+  .menu-btn-title {
+    font-size: 0.95rem;
+  }
+
+  .menu-btn-subtitle {
+    font-size: 0.62rem;
+  }
+
+  /* Grid layout for smartphone screens */
+  .guilds-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  /* On smaller phones, make score buttons touch targets larger */
+  .guild-card-inner {
+    padding: 16px 12px 12px;
+  }
+
+  .guild-shield {
+    width: 48px;
+    height: 48px;
+    font-size: 28px;
+  }
+
+  .guild-name {
+    font-size: 1rem;
+    max-width: 200px;
+  }
+
+  .score-value {
+    font-size: 2.5rem;
+  }
+
+  .guild-buttons-row {
+    gap: 6px;
+  }
+
+  .score-btn {
+    padding: 12px 6px;
+    font-size: 0.8rem;
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+
+  .guild-undo {
+    padding: 10px;
+    font-size: 0.72rem;
+    min-height: 40px;
+  }
+
+  .add-guild-btn {
+    padding: 16px;
+    min-height: 54px;
+    font-size: 0.95rem;
+    touch-action: manipulation;
+  }
+
+  .sponsors-container {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 8px 12px;
+  }
+
+  .sponsor-logo {
+    max-height: 38px;
+    max-width: 130px;
+  }
+
+  .credits-page {
+    padding: 16px 12px 40px;
+  }
+
+  .credits-section {
+    padding: 14px;
+  }
+
+  .credits-text {
+    font-size: 0.85rem;
+  }
+}
+
+/* Medium smartphones (481px to 767px) - 2 columns grid */
+@media (min-width: 481px) and (max-width: 767px) {
+  .guilds-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .score-btn {
+    padding: 9px 4px;
+    font-size: 0.72rem;
   }
 }
 
