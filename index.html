@@ -5,11 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="description" content="Torneio das Guildas dos Magos - Gerencie pontuações de guildas em um torneio de fantasia medieval">
   <meta name="theme-color" content="#0d0d2b">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Guildas">
   <title>Torneio das Guildas dos Magos</title>
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
+  <link rel="apple-touch-icon" href="public/favicon.svg">
+  <link rel="icon" type="image/svg+xml" href="public/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=MedievalSharp&family=Cinzel+Decorative:wght@400;700;900&display=swap" rel="stylesheet">
@@ -33,6 +36,7 @@
     >
       <source src="intro.mp4" type="video/mp4">
     </video>
+    <button class="splash-skip" id="splashSkip" aria-label="Pular introdução">Pular ➔</button>
   </div>
 
   <!-- =============================== -->
@@ -256,11 +260,29 @@
     </div>
   </div>
 
+  <!-- Edit Guild Name Modal -->
+  <div class="modal-overlay" id="editNameModalOverlay">
+    <div class="modal modal-edit-name">
+      <div class="modal-header">
+        <span class="modal-icon">📜</span>
+        <h3 class="modal-title">Renomear Guilda</h3>
+      </div>
+      <div class="modal-body">
+        <label for="editGuildNameInput" class="edit-name-label">Novo Nome Arcano:</label>
+        <input type="text" id="editGuildNameInput" class="edit-name-input" maxlength="30" placeholder="Digite o nome da guilda..." autocomplete="off" spellcheck="false">
+      </div>
+      <div class="modal-buttons">
+        <button class="modal-btn modal-cancel" id="editNameCancel">Cancelar</button>
+        <button class="modal-btn modal-confirm" id="editNameConfirm">Salvar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Score Float Animation Template -->
   <template id="scoreFloatTemplate">
     <div class="score-float"></div>
   </template>
 
-  <script src="app.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>

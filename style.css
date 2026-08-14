@@ -1555,12 +1555,44 @@ body::after {
 }
 
 .modal-confirm {
-  background: linear-gradient(135deg, var(--danger), #c62828);
-  color: #fff;
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+  color: #0d0d2b;
 }
 
 .modal-confirm:hover {
-  box-shadow: 0 0 15px rgba(239, 83, 80, 0.4);
+  box-shadow: 0 0 15px var(--gold-glow);
+}
+
+/* Edit Name Modal Specifics */
+.modal-body {
+  margin-bottom: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.edit-name-label {
+  font-size: 0.8rem;
+  color: var(--gold-light);
+  font-family: var(--font-cinzel);
+}
+
+.edit-name-input {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--bg-primary);
+  border: 1px solid var(--gold-dark);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-medieval);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.edit-name-input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 10px var(--gold-glow);
 }
 
 /* ----- Scrollbar ----- */
@@ -1793,6 +1825,65 @@ body::after {
     font-size: 0.72rem;
   }
 }
+
+/* Safe Area Inset Adjustments for Mobile Viewports (iOS / Notch Android) */
+@supports (padding: env(safe-area-inset-top)) {
+  .header {
+    padding-top: max(16px, env(safe-area-inset-top));
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+
+  .main-content {
+    padding-bottom: max(32px, env(safe-area-inset-bottom));
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+
+  .splash-skip {
+    bottom: max(30px, env(safe-area-inset-bottom));
+    right: max(30px, env(safe-area-inset-right));
+  }
+}
+
+/* Landscape Mode Optimizations for Smartphones */
+@media (max-height: 500px) and (orientation: landscape) {
+  .header-logo-wrapper {
+    display: none;
+  }
+
+  .header {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  .menu-logo {
+    width: 80px;
+    height: 80px;
+  }
+
+  .menu-container {
+    padding-top: 8px;
+    padding-bottom: 16px;
+  }
+
+  .menu-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .menu-btn {
+    flex: 1 1 200px;
+    min-height: 48px;
+    padding: 10px 14px;
+  }
+
+  .guilds-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 
 /* ----- Utility ----- */
 .visually-hidden {

@@ -233,8 +233,9 @@ function addGuild() {
   saveState();
   render();
 
-  // Vibrate
+  // Vibrate & Sound
   vibrate(50);
+  playArcaneSound('invoke');
   showToast(`${guild.name} foi invocada! ✨`);
 }
 
@@ -250,6 +251,7 @@ function removeGuild(guildId) {
       state.usedPresetIndices = state.usedPresetIndices.filter(i => i !== guild.presetIndex);
       saveState();
       render();
+      playArcaneSound('subtract');
       showToast(`${guild.name} foi banida do torneio`);
     }
   );
@@ -287,8 +289,9 @@ function addScore(guildId, amount) {
   updateLeaderHighlight();
   updateUndoButtons();
 
-  // Vibrate
+  // Vibrate & Sound
   vibrate(30);
+  playArcaneSound(amount > 0 ? 'add' : 'subtract');
 }
 
 function undoScore(guildId) {
@@ -324,6 +327,7 @@ function undoScore(guildId) {
   updateLeaderHighlight();
 
   vibrate(20);
+  playArcaneSound('undo');
   showToast(`-${lastAmount} pontos desfeitos`);
 }
 
@@ -510,45 +514,7 @@ function updateResetVisibility() {
 }
 
 // ----- Name Editing -----
-function startNameEdit(guildId) {
-  const guild = state.guilds.find(g => g.id === guildId);
-  if (!guild) return;
-
-  const card = document.querySelector(`[data-guild-id="${guildId}"]`);
-  if (!card) return;
-
-  const nameContainer = card.querySelector('.guild-name-container');
-  const currentName = guild.name;
-
-  nameContainer.innerHTML = `
-    <input class="guild-name-input" type="text" value="${escapeHtml(currentName)}" maxlength="30" data-guild="${guildId}">
-  `;
-
-  const input = nameContainer.querySelector('.guild-name-input');
-  input.focus();
-  input.select();
-
-  const finishEdit = () => {
-    updateGuildName(guildId, input.value);
-    // Re-render the name container
-    const updatedGuild = state.guilds.find(g => g.id === guildId);
-    nameContainer.innerHTML = `
-      <span class="guild-name" data-action="edit-name" data-guild="${guildId}" title="Clique para editar o nome">${escapeHtml(updatedGuild.name)}</span>
-      <button class="guild-edit-btn" data-action="edit-name" data-guild="${guildId}" title="Editar nome" aria-label="Editar nome">✏️</button>
-    `;
-  };
-
-  input.addEventListener('blur', finishEdit);
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      input.blur();
-    } else if (e.key === 'Escape') {
-      input.value = currentName;
-      input.blur();
-    }
-  });
-}
+// (Name editing handled via Medieval Modal below)
 
 // ----- Animations -----
 function animateScoreAdd(card, amount, guild) {
@@ -635,6 +601,69 @@ function showToast(message) {
   setTimeout(() => toast.remove(), 3000);
 }
 
+// ----- Audio Feedback (Web Audio API Synthesizer) -----
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function getAudioContext() {
+  if (!audioCtx) {
+    audioCtx = new AudioContext();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+  return audioCtx;
+}
+
+function playArcaneSound(type) {
+  try {
+    const ctx = getAudioContext();
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    if (type === 'add') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(523.25, now);
+      osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.08);
+      osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.16);
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+      osc.start(now);
+      osc.stop(now + 0.3);
+    } else if (type === 'subtract') {
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(400, now);
+      osc.frequency.exponentialRampToValueAtTime(220, now + 0.15);
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+      osc.start(now);
+      osc.stop(now + 0.2);
+    } else if (type === 'invoke') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(330, now);
+      osc.frequency.exponentialRampToValueAtTime(880, now + 0.25);
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+      osc.start(now);
+      osc.stop(now + 0.35);
+    } else if (type === 'undo') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(587.33, now);
+      osc.frequency.exponentialRampToValueAtTime(349.23, now + 0.12);
+      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+      osc.start(now);
+      osc.stop(now + 0.18);
+    }
+  } catch (e) {
+    // Ignore audio failures if unsupported/blocked
+  }
+}
+
 // ----- Modal -----
 let modalResolve = null;
 
@@ -649,6 +678,59 @@ function showModal(title, message, onConfirm) {
 function hideModal() {
   modalOverlay.classList.remove('active');
   modalResolve = null;
+}
+
+// ----- Edit Name Modal -----
+const editNameModalOverlay = document.getElementById('editNameModalOverlay');
+const editGuildNameInput = document.getElementById('editGuildNameInput');
+const editNameConfirm = document.getElementById('editNameConfirm');
+const editNameCancel = document.getElementById('editNameCancel');
+let currentEditingGuildId = null;
+
+function startNameEdit(guildId) {
+  const guild = state.guilds.find(g => g.id === guildId);
+  if (!guild) return;
+
+  currentEditingGuildId = guildId;
+  editGuildNameInput.value = guild.name;
+  editNameModalOverlay.classList.add('active');
+  setTimeout(() => {
+    editGuildNameInput.focus();
+    editGuildNameInput.select();
+  }, 100);
+}
+
+function hideEditNameModal() {
+  if (editNameModalOverlay) {
+    editNameModalOverlay.classList.remove('active');
+  }
+  currentEditingGuildId = null;
+}
+
+function saveGuildNameEdit() {
+  if (currentEditingGuildId === null) return;
+  const newName = editGuildNameInput.value.trim();
+  if (newName.length > 0 && newName.length <= 30) {
+    updateGuildName(currentEditingGuildId, newName);
+    renderGuilds();
+    showToast(`Nome atualizado para "${escapeHtml(newName)}"! 📜`);
+    playArcaneSound('invoke');
+  }
+  hideEditNameModal();
+}
+
+if (editNameConfirm) editNameConfirm.addEventListener('click', saveGuildNameEdit);
+if (editNameCancel) editNameCancel.addEventListener('click', hideEditNameModal);
+if (editNameModalOverlay) {
+  editNameModalOverlay.addEventListener('click', (e) => {
+    if (e.target === editNameModalOverlay) hideEditNameModal();
+  });
+}
+if (editGuildNameInput) {
+  editGuildNameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') saveGuildNameEdit();
+    if (e.key === 'Escape') hideEditNameModal();
+  });
 }
 
 // ----- Haptic Feedback -----
@@ -730,8 +812,9 @@ modalOverlay.addEventListener('click', (e) => {
 
 // Keyboard shortcut to close modal
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && modalOverlay.classList.contains('active')) {
-    hideModal();
+  if (e.key === 'Escape') {
+    if (modalOverlay.classList.contains('active')) hideModal();
+    if (editNameModalOverlay && editNameModalOverlay.classList.contains('active')) hideEditNameModal();
   }
 });
 
@@ -742,6 +825,7 @@ document.getElementById('menuNav').addEventListener('click', (e) => {
 
   const page = btn.dataset.page;
   vibrate(30);
+  playArcaneSound('add');
   navigateTo(page);
 });
 
@@ -750,6 +834,7 @@ document.querySelectorAll('.back-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const page = btn.dataset.page;
     vibrate(20);
+    playArcaneSound('undo');
     navigateTo(page);
   });
 });
@@ -757,6 +842,7 @@ document.querySelectorAll('.back-btn').forEach(btn => {
 // ----- Splash Screen -----
 const splashScreen = document.getElementById('splashScreen');
 const splashVideo = document.getElementById('splashVideo');
+const splashSkip = document.getElementById('splashSkip');
 
 function dismissSplash() {
   splashScreen.classList.remove('active');
@@ -777,6 +863,11 @@ function dismissSplash() {
 // When video ends naturally, dismiss the splash
 splashVideo.addEventListener('ended', dismissSplash);
 
+// Skip button click
+if (splashSkip) {
+  splashSkip.addEventListener('click', dismissSplash);
+}
+
 // Tap/click anywhere on video to skip too (optional, for mobile convenience)
 splashVideo.addEventListener('click', () => {
   // Only allow skipping after 2 seconds
@@ -795,6 +886,17 @@ function init() {
   loadState();
   createBackgroundParticles();
   render();
+
+  // Register Service Worker for PWA Offline capability
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').then(reg => {
+        console.log('[SW] ServiceWorker registrado com sucesso:', reg.scope);
+      }).catch(err => {
+        console.warn('[SW] Falha ao registrar ServiceWorker:', err);
+      });
+    });
+  }
 
   // Process logos to remove black background
   document.querySelectorAll('.menu-logo, .credits-logo, .page-logo').forEach(logo => {
