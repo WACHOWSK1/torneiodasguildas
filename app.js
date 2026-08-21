@@ -89,16 +89,48 @@ const particlesContainer = document.getElementById('particles');
 
 // Page elements
 const pageMenu = document.getElementById('pageMenu');
+const pageStart = document.getElementById('pageStart');
 const pageTournament = document.getElementById('pageTournament');
 const pageMarket = document.getElementById('pageMarket');
-const pageCredits = document.getElementById('pageCredits');
+const pageAbout = document.getElementById('pageAbout') || document.getElementById('pageCredits');
 
 const allPages = {
   menu: pageMenu,
+  start: pageStart,
   tournament: pageTournament,
   market: pageMarket,
-  credits: pageCredits,
+  about: pageAbout,
+  credits: pageAbout,
 };
+
+// Quick Controls & Audio Elements
+const themeToggleBtn = document.getElementById('themeToggleBtn');
+const themeIcon = document.getElementById('themeIcon');
+const sfxToggleBtn = document.getElementById('sfxToggleBtn');
+const sfxIcon = document.getElementById('sfxIcon');
+const musicToggleBtn = document.getElementById('musicToggleBtn');
+const musicPlayingIndicator = document.getElementById('musicPlayingIndicator');
+
+const musicPlayerPanel = document.getElementById('musicPlayerPanel');
+const musicCloseBtn = document.getElementById('musicCloseBtn');
+const musicTrackTitle = document.getElementById('musicTrackTitle');
+const musicTrackMeta = document.getElementById('musicTrackMeta');
+const musicDiscWrapper = document.getElementById('musicDiscWrapper');
+const musicCurrentTime = document.getElementById('musicCurrentTime');
+const musicTotalTime = document.getElementById('musicTotalTime');
+const musicProgressBar = document.getElementById('musicProgressBar');
+const musicProgressBarWrap = document.getElementById('musicProgressBarWrap');
+const musicPrevBtn = document.getElementById('musicPrevBtn');
+const musicPlayBtn = document.getElementById('musicPlayBtn');
+const musicNextBtn = document.getElementById('musicNextBtn');
+const musicPlaylistToggleBtn = document.getElementById('musicPlaylistToggleBtn');
+const musicVolumeSlider = document.getElementById('musicVolumeSlider');
+const musicVolIcon = document.getElementById('musicVolIcon');
+const musicVolumeValue = document.getElementById('musicVolumeValue');
+const musicPlaylistDrawer = document.getElementById('musicPlaylistDrawer');
+const musicPlaylistList = document.getElementById('musicPlaylistList');
+
+let musicPlayerInstance = null;
 
 // ----- Remove Black Background from Logo -----
 function removeBlackBackground(imgElement) {
@@ -614,6 +646,58 @@ function showToast(message) {
   setTimeout(() => toast.remove(), 3000);
 }
 
+// ----- Theme Management (Light / Dark Mode) -----
+function initTheme() {
+  const savedTheme = localStorage.getItem('torneio_theme') || 'dark';
+  applyTheme(savedTheme);
+}
+
+function applyTheme(theme) {
+  const isLight = theme === 'light';
+  document.body.classList.toggle('light-theme', isLight);
+  if (themeIcon) {
+    themeIcon.textContent = isLight ? '🌙' : '☀️';
+  }
+  const tooltip = themeToggleBtn ? themeToggleBtn.querySelector('.quick-btn-tooltip') : null;
+  if (tooltip) {
+    tooltip.textContent = isLight ? 'Modo Escuro' : 'Modo Claro';
+  }
+  localStorage.setItem('torneio_theme', theme);
+}
+
+function toggleTheme() {
+  const isCurrentlyLight = document.body.classList.contains('light-theme');
+  const newTheme = isCurrentlyLight ? 'dark' : 'light';
+  applyTheme(newTheme);
+  playArcaneSound('invoke');
+  showToast(newTheme === 'light' ? '📜 Modo Pergaminho Claro ativado' : '🌙 Modo Arcana Escuro ativado');
+}
+
+// ----- SFX Mute Management -----
+let sfxMuted = localStorage.getItem('torneio_sfx_muted') === 'true';
+
+function updateSfxButtonUI() {
+  if (sfxIcon) {
+    sfxIcon.textContent = sfxMuted ? '🔇' : '🔊';
+  }
+  const tooltip = sfxToggleBtn ? sfxToggleBtn.querySelector('.quick-btn-tooltip') : null;
+  if (tooltip) {
+    tooltip.textContent = sfxMuted ? 'Ativar Sons' : 'Desativar Sons';
+  }
+}
+
+function toggleSfxMute() {
+  sfxMuted = !sfxMuted;
+  localStorage.setItem('torneio_sfx_muted', sfxMuted ? 'true' : 'false');
+  updateSfxButtonUI();
+  if (!sfxMuted) {
+    playArcaneSound('add');
+    showToast('🔊 Efeitos sonoros ativados');
+  } else {
+    showToast('🔇 Efeitos sonoros desativados (Mudo)');
+  }
+}
+
 // ----- Audio Feedback (Web Audio API Synthesizer) -----
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
@@ -629,6 +713,8 @@ function getAudioContext() {
 }
 
 function playArcaneSound(type) {
+  if (sfxMuted) return;
+
   try {
     const ctx = getAudioContext();
     const now = ctx.currentTime;
@@ -674,6 +760,381 @@ function playArcaneSound(type) {
     }
   } catch (e) {
     // Ignore audio failures if unsupported/blocked
+  }
+}
+
+// ============================================
+// MEDIEVAL BGM MUSIC PLAYER & PLAYLIST
+// ============================================
+const PLAYLIST = [
+  {
+    id: 1,
+    title: 'Briga de Taverna',
+    artist: 'Trilha Medieval • Enérgica',
+    src: 'audio/BRIGA DE TAVERNA.mp3'
+  },
+  {
+    id: 2,
+    title: 'Biblioteca Sem Fim',
+    artist: 'Trilha Medieval • Mistério & Estudo',
+    src: 'audio/Biblioteca Sem Fim.mp3'
+  },
+  {
+    id: 3,
+    title: 'Pouso na Taverna',
+    artist: 'Trilha Medieval • Aconchegante',
+    src: 'audio/Pouso na Taverna.mp3'
+  },
+  {
+    id: 4,
+    title: 'Taverna Felizinha',
+    artist: 'Trilha Medieval • Festiva',
+    src: 'audio/TAVERNA FELIZINHA.mp3'
+  },
+  {
+    id: 5,
+    title: 'Taverna da Estrada',
+    artist: 'Trilha Medieval • Aventura',
+    src: 'audio/Taverna da Estrada.mp3'
+  },
+  {
+    id: 6,
+    title: 'Taverna dos Magos',
+    artist: 'Trilha Medieval • Clássica',
+    src: 'audio/taverna.mp3'
+  },
+  {
+    id: 7,
+    title: 'Taverna dos Aventureiros',
+    artist: 'Trilha Medieval • Instrumental',
+    src: 'audio/taverna_02.mp3'
+  },
+  {
+    id: 8,
+    title: 'Briga de Taverna (Versão 2)',
+    artist: 'Trilha Medieval • Batalha',
+    src: 'audio/BRIGA DE TAVERNA (1).mp3'
+  },
+  {
+    id: 9,
+    title: 'Biblioteca Sem Fim (Versão 2)',
+    artist: 'Trilha Medieval • Arcano',
+    src: 'audio/Biblioteca Sem Fim (1).mp3'
+  },
+  {
+    id: 10,
+    title: 'Pouso na Taverna (Versão 2)',
+    artist: 'Trilha Medieval • Repouso',
+    src: 'audio/Pouso na Taverna (1).mp3'
+  },
+  {
+    id: 11,
+    title: 'Taverna da Estrada (Versão 2)',
+    artist: 'Trilha Medieval • Jornada',
+    src: 'audio/Taverna da Estrada (1).mp3'
+  }
+];
+
+class MedievalMusicPlayer {
+  constructor() {
+    this.playlist = PLAYLIST;
+    this.currentIndex = 0;
+    this.isPlaying = false;
+    this.audio = new Audio();
+    this.audio.preload = 'metadata';
+    this.volume = parseFloat(localStorage.getItem('torneio_bgm_volume') || '0.7');
+    this.audio.volume = this.volume;
+    this.isSynthFallback = false;
+    this.synthInterval = null;
+
+    this.bindEvents();
+    this.renderPlaylist();
+    this.loadTrack(0, false);
+    this.updateVolumeUI();
+  }
+
+  bindEvents() {
+    this.audio.addEventListener('timeupdate', () => this.onTimeUpdate());
+    this.audio.addEventListener('loadedmetadata', () => this.onMetadataLoaded());
+    this.audio.addEventListener('ended', () => this.nextTrack(true));
+    this.audio.addEventListener('error', (e) => this.onAudioError(e));
+
+    if (musicPlayBtn) {
+      musicPlayBtn.addEventListener('click', () => this.togglePlay());
+    }
+    if (musicNextBtn) {
+      musicNextBtn.addEventListener('click', () => {
+        playArcaneSound('undo');
+        this.nextTrack(false);
+      });
+    }
+    if (musicPrevBtn) {
+      musicPrevBtn.addEventListener('click', () => {
+        playArcaneSound('undo');
+        this.prevTrack();
+      });
+    }
+    if (musicProgressBarWrap) {
+      musicProgressBarWrap.addEventListener('click', (e) => this.seek(e));
+    }
+    if (musicVolumeSlider) {
+      musicVolumeSlider.addEventListener('input', (e) => this.setVolume(e.target.value));
+    }
+    if (musicVolIcon) {
+      musicVolIcon.addEventListener('click', () => this.toggleMute());
+    }
+    if (musicPlaylistToggleBtn) {
+      musicPlaylistToggleBtn.addEventListener('click', () => this.togglePlaylistDrawer());
+    }
+    if (musicToggleBtn) {
+      musicToggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.togglePanel();
+      });
+    }
+    if (musicCloseBtn) {
+      musicCloseBtn.addEventListener('click', () => this.closePanel());
+    }
+
+    // Close panel when clicking outside
+    document.addEventListener('click', (e) => {
+      if (musicPlayerPanel && musicPlayerPanel.classList.contains('active')) {
+        if (!musicPlayerPanel.contains(e.target) && !musicToggleBtn.contains(e.target)) {
+          this.closePanel();
+        }
+      }
+    });
+  }
+
+  loadTrack(index, autoPlay = false) {
+    if (index < 0) index = this.playlist.length - 1;
+    if (index >= this.playlist.length) index = 0;
+    this.currentIndex = index;
+
+    const track = this.playlist[this.currentIndex];
+    if (musicTrackTitle) musicTrackTitle.textContent = track.title;
+    if (musicTrackMeta) musicTrackMeta.textContent = `Faixa ${index + 1} de ${this.playlist.length} • ${track.artist}`;
+
+    this.stopSynthFallback();
+    this.audio.src = track.src;
+
+    this.updatePlaylistUI();
+
+    if (autoPlay) {
+      this.play();
+    }
+  }
+
+  play() {
+    this.stopSynthFallback();
+    const playPromise = this.audio.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        this.isPlaying = true;
+        this.updatePlayStateUI();
+      }).catch((err) => {
+        console.log('[Audio] Arquivo de áudio local ainda não encontrado. Tocando melodia sintetizada de demonstração.');
+        this.startSynthFallback();
+      });
+    }
+  }
+
+  pause() {
+    this.stopSynthFallback();
+    this.audio.pause();
+    this.isPlaying = false;
+    this.updatePlayStateUI();
+  }
+
+  togglePlay() {
+    if (this.isPlaying) {
+      this.pause();
+    } else {
+      this.play();
+    }
+  }
+
+  nextTrack(auto = false) {
+    this.loadTrack(this.currentIndex + 1, auto ? true : this.isPlaying);
+  }
+
+  prevTrack() {
+    this.loadTrack(this.currentIndex - 1, this.isPlaying);
+  }
+
+  updatePlayStateUI() {
+    if (musicPlayBtn) {
+      musicPlayBtn.textContent = this.isPlaying ? '⏸️' : '▶️';
+    }
+    if (musicDiscWrapper) {
+      musicDiscWrapper.classList.toggle('spinning', this.isPlaying);
+    }
+    if (musicPlayingIndicator) {
+      musicPlayingIndicator.classList.toggle('active', this.isPlaying);
+    }
+  }
+
+  onTimeUpdate() {
+    if (this.isSynthFallback) return;
+    const cur = this.audio.currentTime || 0;
+    const dur = this.audio.duration || 0;
+    if (musicCurrentTime) musicCurrentTime.textContent = this.formatTime(cur);
+    if (musicProgressBar && dur > 0) {
+      musicProgressBar.style.width = `${(cur / dur) * 100}%`;
+    }
+  }
+
+  onMetadataLoaded() {
+    const dur = this.audio.duration || 0;
+    if (musicTotalTime) musicTotalTime.textContent = this.formatTime(dur);
+  }
+
+  onAudioError(e) {
+    if (this.isPlaying) {
+      this.startSynthFallback();
+    }
+  }
+
+  seek(e) {
+    if (this.isSynthFallback || !this.audio.duration) return;
+    const rect = musicProgressBarWrap.getBoundingClientRect();
+    const pos = (e.clientX - rect.left) / rect.width;
+    this.audio.currentTime = pos * this.audio.duration;
+  }
+
+  setVolume(val) {
+    this.volume = parseFloat(val);
+    this.audio.volume = this.volume;
+    localStorage.setItem('torneio_bgm_volume', this.volume);
+    this.updateVolumeUI();
+  }
+
+  toggleMute() {
+    if (this.audio.volume > 0) {
+      this.prevVolume = this.volume;
+      this.setVolume(0);
+    } else {
+      this.setVolume(this.prevVolume || 0.7);
+    }
+  }
+
+  updateVolumeUI() {
+    if (musicVolumeSlider) musicVolumeSlider.value = this.volume;
+    if (musicVolumeValue) musicVolumeValue.textContent = `${Math.round(this.volume * 100)}%`;
+    if (musicVolIcon) {
+      if (this.volume === 0) musicVolIcon.textContent = '🔇';
+      else if (this.volume < 0.4) musicVolIcon.textContent = '🔈';
+      else musicVolIcon.textContent = '🔊';
+    }
+  }
+
+  formatTime(seconds) {
+    if (isNaN(seconds) || seconds === Infinity) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  }
+
+  renderPlaylist() {
+    if (!musicPlaylistList) return;
+    musicPlaylistList.innerHTML = this.playlist.map((track, i) => `
+      <li class="music-playlist-item ${i === this.currentIndex ? 'active' : ''}" data-index="${i}">
+        <span>${track.id}. ${track.title}</span>
+        <span style="opacity: 0.6; font-size: 0.7rem;">▶</span>
+      </li>
+    `).join('');
+
+    musicPlaylistList.querySelectorAll('.music-playlist-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const idx = parseInt(item.dataset.index);
+        this.loadTrack(idx, true);
+      });
+    });
+  }
+
+  updatePlaylistUI() {
+    if (!musicPlaylistList) return;
+    musicPlaylistList.querySelectorAll('.music-playlist-item').forEach((item, i) => {
+      item.classList.toggle('active', i === this.currentIndex);
+    });
+  }
+
+  togglePlaylistDrawer() {
+    if (musicPlaylistDrawer) {
+      musicPlaylistDrawer.classList.toggle('active');
+    }
+  }
+
+  togglePanel() {
+    if (musicPlayerPanel) {
+      musicPlayerPanel.classList.toggle('active');
+      if (musicPlayerPanel.classList.contains('active')) {
+        playArcaneSound('add');
+      }
+    }
+  }
+
+  closePanel() {
+    if (musicPlayerPanel) {
+      musicPlayerPanel.classList.remove('active');
+    }
+  }
+
+  // Fallback Procedural Ambient Medieval Harp Synth
+  startSynthFallback() {
+    this.isSynthFallback = true;
+    this.isPlaying = true;
+    this.updatePlayStateUI();
+    if (musicTrackMeta) {
+      musicTrackMeta.textContent = `(Melodia Medieval Sintetizada • Demonstração)`;
+    }
+
+    if (this.synthInterval) clearInterval(this.synthInterval);
+    const chords = [
+      [220, 261.63, 329.63, 440], // Am
+      [174.61, 220, 261.63, 349.23], // F
+      [261.63, 329.63, 392.00, 523.25], // C
+      [196.00, 246.94, 293.66, 392.00]  // G
+    ];
+    let chordIdx = 0;
+    let noteIdx = 0;
+
+    this.synthInterval = setInterval(() => {
+      if (!this.isPlaying) return;
+      try {
+        const ctx = getAudioContext();
+        const now = ctx.currentTime;
+        const currentChord = chords[chordIdx];
+        const freq = currentChord[noteIdx];
+
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now);
+
+        gain.gain.setValueAtTime(0.04 * this.volume, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(now);
+        osc.stop(now + 1.2);
+
+        noteIdx = (noteIdx + 1) % currentChord.length;
+        if (noteIdx === 0) {
+          chordIdx = (chordIdx + 1) % chords.length;
+        }
+      } catch (e) {}
+    }, 450);
+  }
+
+  stopSynthFallback() {
+    this.isSynthFallback = false;
+    if (this.synthInterval) {
+      clearInterval(this.synthInterval);
+      this.synthInterval = null;
+    }
   }
 }
 
@@ -852,6 +1313,16 @@ document.querySelectorAll('.back-btn').forEach(btn => {
   });
 });
 
+// Generic CTA [data-page] buttons (e.g. from Comece Aqui page)
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-page]');
+  if (!btn || btn.closest('#menuNav') || btn.classList.contains('back-btn')) return;
+  const page = btn.dataset.page;
+  vibrate(30);
+  playArcaneSound('add');
+  navigateTo(page);
+});
+
 // ----- Splash Screen -----
 const splashScreen = document.getElementById('splashScreen');
 const splashVideo = document.getElementById('splashVideo');
@@ -898,8 +1369,27 @@ if (splashScreen) {
   });
 }
 
+// Quick Controls Listeners
+if (themeToggleBtn) {
+  themeToggleBtn.addEventListener('click', () => {
+    vibrate(20);
+    toggleTheme();
+  });
+}
+
+if (sfxToggleBtn) {
+  sfxToggleBtn.addEventListener('click', () => {
+    vibrate(20);
+    toggleSfxMute();
+  });
+}
+
 // ----- Initialize -----
 function init() {
+  initTheme();
+  updateSfxButtonUI();
+  musicPlayerInstance = new MedievalMusicPlayer();
+
   loadState();
   createBackgroundParticles();
   render();
@@ -917,7 +1407,7 @@ function init() {
   }
 
   // Process logos to remove black background
-  document.querySelectorAll('.menu-logo, .credits-logo, .page-logo').forEach(logo => {
+  document.querySelectorAll('.menu-logo, .credits-logo, .page-logo, .start-logo').forEach(logo => {
     removeBlackBackground(logo);
   });
 
@@ -925,6 +1415,12 @@ function init() {
   if (sessionStorage.getItem('intro_shown') === '1') {
     dismissSplash();
   } else if (splashVideo) {
+    const isDesktop = window.innerWidth >= 768 || (!/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) && window.innerWidth > window.innerHeight);
+    const targetVideo = isDesktop ? 'intro-desktop.mp4' : 'intro.mp4';
+    if (!splashVideo.src || !splashVideo.src.includes(targetVideo)) {
+      splashVideo.src = targetVideo;
+    }
+
     splashVideo.play().catch(() => {
       // Autoplay blocked or failed, fallback to dismiss
       setTimeout(dismissSplash, 1000);

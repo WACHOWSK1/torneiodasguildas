@@ -16,8 +16,9 @@
   <title>Torneio das Guildas dos Magos</title>
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="public/favicon.svg">
-  <link rel="icon" type="image/svg+xml" href="public/favicon.svg">
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=MedievalSharp&family=Cinzel+Decorative:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&display=swap" rel="stylesheet">
   <style>
     /* Prevent layout shift between short and tall pages & hide scrollbars completely */
     html {
@@ -60,11 +61,101 @@
       height: 0 !important;
     }
   </style>
-  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
   <!-- Magical Particles Background -->
   <div class="particles" id="particles" aria-hidden="true"></div>
+
+  <!-- =============================== -->
+  <!-- TOP QUICK CONTROLS BAR          -->
+  <!-- =============================== -->
+  <div class="top-quick-bar" id="topQuickBar">
+    <div class="quick-controls-group">
+      <!-- Theme Toggle (Light / Dark) -->
+      <button class="quick-btn theme-toggle-btn" id="themeToggleBtn" title="Alternar Modo Claro/Escuro" aria-label="Alternar Modo Claro ou Escuro">
+        <span class="quick-btn-icon theme-icon" id="themeIcon">☀️</span>
+        <span class="quick-btn-tooltip">Modo Claro</span>
+      </button>
+
+      <!-- Sound Effects Toggle (Mute / Unmute) -->
+      <button class="quick-btn sfx-toggle-btn" id="sfxToggleBtn" title="Ativar/Desativar Efeitos Sonoros" aria-label="Efeitos Sonoros">
+        <span class="quick-btn-icon" id="sfxIcon">🔊</span>
+        <span class="quick-btn-tooltip">Efeitos Sonoros</span>
+      </button>
+
+      <!-- Music Player Toggle / Mini Button -->
+      <button class="quick-btn music-toggle-btn" id="musicToggleBtn" title="Player de Música Medieval" aria-label="Música Medieval">
+        <span class="quick-btn-icon" id="musicIcon">🎵</span>
+        <span class="quick-btn-tooltip">Música Medieval</span>
+        <span class="music-playing-indicator" id="musicPlayingIndicator"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- =============================== -->
+  <!-- MEDIEVAL MUSIC PLAYER DOCK      -->
+  <!-- =============================== -->
+  <div class="music-player-panel" id="musicPlayerPanel" aria-hidden="true">
+    <div class="music-panel-header">
+      <div class="music-panel-title-wrap">
+        <span class="music-panel-icon">🎻</span>
+        <div>
+          <h4 class="music-panel-title">Bardo das Guildas</h4>
+          <span class="music-panel-subtitle">Trilha Sonora Medieval</span>
+        </div>
+      </div>
+      <button class="music-close-btn" id="musicCloseBtn" title="Fechar painel">✕</button>
+    </div>
+
+    <!-- Current Track Display -->
+    <div class="music-track-info">
+      <div class="music-disc-wrapper" id="musicDiscWrapper">
+        <span class="music-disc-icon">🔮</span>
+      </div>
+      <div class="music-track-details">
+        <div class="music-track-title" id="musicTrackTitle">Taberna dos Magos</div>
+        <div class="music-track-meta" id="musicTrackMeta">Faixa 1 de 4 • Trilha Medieval</div>
+      </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="music-progress-container">
+      <span class="music-time" id="musicCurrentTime">0:00</span>
+      <div class="music-progress-bar-wrapper" id="musicProgressBarWrap">
+        <div class="music-progress-bar" id="musicProgressBar"></div>
+      </div>
+      <span class="music-time" id="musicTotalTime">0:00</span>
+    </div>
+
+    <!-- Playback Controls -->
+    <div class="music-controls">
+      <button class="music-ctrl-btn" id="musicPrevBtn" title="Faixa Anterior">⏮️</button>
+      <button class="music-ctrl-btn music-play-btn" id="musicPlayBtn" title="Tocar / Pausar">▶️</button>
+      <button class="music-ctrl-btn" id="musicNextBtn" title="Próxima Faixa">⏭️</button>
+      <button class="music-ctrl-btn" id="musicPlaylistToggleBtn" title="Ver Lista de Músicas">📜</button>
+    </div>
+
+    <!-- Volume Bar -->
+    <div class="music-volume-container">
+      <span class="music-volume-icon" id="musicVolIcon">🔉</span>
+      <input type="range" class="music-volume-slider" id="musicVolumeSlider" min="0" max="1" step="0.01" value="0.7" title="Volume da Música">
+      <span class="music-volume-value" id="musicVolumeValue">70%</span>
+    </div>
+
+    <!-- Playlist Drawer -->
+    <div class="music-playlist-drawer" id="musicPlaylistDrawer">
+      <div class="playlist-drawer-header">
+        <span>📜 Pergaminho de Canções</span>
+      </div>
+      <ul class="music-playlist-list" id="musicPlaylistList">
+        <!-- Dynamic playlist items -->
+      </ul>
+      <div class="music-local-hint">
+        <p>💡 <em>Dica: Coloque seus arquivos .mp3 na pasta <code>audio/</code> do projeto!</em></p>
+      </div>
+    </div>
+  </div>
 
   <!-- =============================== -->
   <!-- SPLASH SCREEN (Intro Video)     -->
@@ -79,6 +170,7 @@
       webkit-playsinline
       preload="auto"
     >
+      <source src="intro-desktop.mp4" type="video/mp4" media="(min-width: 768px)">
       <source src="intro.mp4" type="video/mp4">
     </video>
     <button class="splash-skip" id="splashSkip" title="Pular introdução">Pular Vídeo ›</button>
@@ -86,6 +178,11 @@
       (function() {
         var v = document.getElementById('splashVideo');
         if (v) {
+          var isDesktop = window.innerWidth >= 768 || (!/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) && window.innerWidth > window.innerHeight);
+          var selectedSrc = isDesktop ? 'intro-desktop.mp4' : 'intro.mp4';
+          if (!v.currentSrc || !v.currentSrc.includes(selectedSrc)) {
+            v.src = selectedSrc;
+          }
           v.play().catch(function(){});
         }
       })();
@@ -105,6 +202,15 @@
 
       <!-- Menu Buttons -->
       <nav class="menu-nav" id="menuNav">
+        <button class="menu-btn menu-btn-start" id="btnComeceAqui" data-page="start">
+          <span class="menu-btn-icon">✨</span>
+          <span class="menu-btn-content">
+            <span class="menu-btn-title">Comece Aqui</span>
+            <span class="menu-btn-subtitle">Para que serve este programa?</span>
+          </span>
+          <span class="menu-btn-arrow">›</span>
+        </button>
+
         <button class="menu-btn menu-btn-primary" id="btnTorneio" data-page="tournament">
           <span class="menu-btn-icon">⚔️</span>
           <span class="menu-btn-content">
@@ -123,11 +229,11 @@
           <span class="menu-btn-arrow">›</span>
         </button>
 
-        <button class="menu-btn menu-btn-tertiary" id="btnCreditos" data-page="credits">
+        <button class="menu-btn menu-btn-tertiary" id="btnSobre" data-page="about">
           <span class="menu-btn-icon">📜</span>
           <span class="menu-btn-content">
-            <span class="menu-btn-title">Créditos</span>
-            <span class="menu-btn-subtitle">Sobre o torneio</span>
+            <span class="menu-btn-title">Sobre</span>
+            <span class="menu-btn-subtitle">Sobre o torneio e pesquisa</span>
           </span>
           <span class="menu-btn-arrow">›</span>
         </button>
@@ -246,10 +352,77 @@
   </div>
 
   <!-- =============================== -->
-  <!-- PAGE: CREDITS                   -->
+  <!-- PAGE: START (Comece Aqui)       -->
   <!-- =============================== -->
-  <div class="page page-credits" id="pageCredits">
-    <button class="back-btn" id="backBtnCredits" data-page="menu">
+  <div class="page page-start" id="pageStart">
+    <button class="back-btn" id="backBtnStart" data-page="menu">
+      <span class="back-btn-arrow">‹</span>
+      <span>Menu</span>
+    </button>
+
+    <div class="start-page">
+      <div class="start-logo-wrapper">
+        <img src="logo.jpg" alt="Logo" class="start-logo">
+      </div>
+      <h2 class="start-title">COMECE AQUI</h2>
+      <p class="start-subtitle">Guia do Sistema & Apresentação Pedagógica</p>
+      <div class="start-divider">✦ ✦ ✦</div>
+
+      <div class="start-card">
+        <h3 class="start-section-heading">Para que serve este programa?</h3>
+        
+        <p class="start-paragraph">
+          O <strong>Sistema de Gerenciamento do Torneio das Guildas dos Magos</strong> foi desenvolvido para auxiliar o professor na organização e no acompanhamento da gincana durante sua aplicação com os estudantes.
+        </p>
+
+        <p class="start-paragraph">
+          Por meio dele, o professor pode <strong>cadastrar as guildas participantes, acompanhar suas pontuações e visualizar a classificação das equipes ao longo do torneio</strong>, mantendo essas informações reunidas em um único ambiente digital. Dessa maneira, o sistema facilita o gerenciamento da competição e permite que o professor concentre sua atenção na condução das atividades, na mediação das aprendizagens e na participação dos estudantes.
+        </p>
+
+        <p class="start-paragraph">
+          A ferramenta faz parte do produto educacional <strong>Torneio das Guildas dos Magos</strong>, uma gincana interdisciplinar gamificada que articula conhecimentos de <strong>Matemática e Língua Portuguesa</strong>, tendo como referência habilidades presentes nas matrizes do <strong>SAEB</strong>. Durante a experiência, os estudantes são organizados em guildas e enfrentam desafios de diferentes níveis, acumulando pontos conforme seu desempenho.
+        </p>
+
+        <p class="start-paragraph">
+          A pontuação registrada no sistema permite acompanhar, de maneira clara e dinâmica, o progresso de cada guilda e sua posição no <strong>ranking do torneio</strong>. Esse acompanhamento integra a própria narrativa do jogo e contribui para tornar visível a evolução das equipes ao longo das diferentes etapas da competição.
+        </p>
+
+        <p class="start-paragraph">
+          O sistema também foi pensado para acompanhar outros elementos da gamificação presentes no Torneio das Guildas, como os <strong>power-ups e demais recursos da narrativa</strong>, ampliando progressivamente as possibilidades de gerenciamento da experiência pelo professor.
+        </p>
+
+        <p class="start-paragraph">
+          É importante compreender que o programa funciona como uma <strong>ferramenta de apoio à aplicação da gincana</strong>. Ele organiza informações, pontuações e equipes, mas a condução pedagógica permanece sob responsabilidade do professor, que orienta os estudantes, apresenta os desafios, acompanha as discussões e promove a reflexão sobre as estratégias e conhecimentos mobilizados durante as atividades.
+        </p>
+
+        <p class="start-paragraph highlight">
+          Assim, tecnologia, narrativa e gamificação atuam como suporte para aquilo que constitui o objetivo principal do Torneio das Guildas dos Magos: <strong>promover uma experiência de aprendizagem interdisciplinar, colaborativa, participativa e envolvente</strong>.
+        </p>
+      </div>
+
+      <div class="start-actions">
+        <button class="menu-btn menu-btn-primary start-cta-btn" data-page="tournament">
+          <span class="menu-btn-icon">⚔️</span>
+          <span class="menu-btn-content">
+            <span class="menu-btn-title">Ir para o Torneio</span>
+            <span class="menu-btn-subtitle">Gerenciar pontuações das guildas</span>
+          </span>
+          <span class="menu-btn-arrow">›</span>
+        </button>
+      </div>
+
+      <div class="sponsors-container start-sponsors">
+        <img src="utfpr-logo-branco.png" alt="UTFPR" class="sponsor-logo">
+        <img src="ppgfcet-logo-branco.png" alt="PPGFCET" class="sponsor-logo">
+      </div>
+    </div>
+  </div>
+
+  <!-- =============================== -->
+  <!-- PAGE: SOBRE (Credits / About)   -->
+  <!-- =============================== -->
+  <div class="page page-credits page-about" id="pageAbout">
+    <button class="back-btn" id="backBtnAbout" data-page="menu">
       <span class="back-btn-arrow">‹</span>
       <span>Menu</span>
     </button>
