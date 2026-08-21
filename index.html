@@ -19,8 +19,20 @@
   <link rel="icon" type="image/svg+xml" href="public/favicon.svg">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=MedievalSharp&family=Cinzel+Decorative:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
-    /* Force hide scrollbars across Chrome, Safari, Edge, Firefox */
-    html, body, * {
+    /* Prevent layout shift between short and tall pages & hide scrollbars completely */
+    html {
+      scrollbar-gutter: stable;
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+      overflow-y: scroll;
+    }
+    body {
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+      overflow-x: hidden;
+      width: 100%;
+    }
+    * {
       scrollbar-width: none !important;
       -ms-overflow-style: none !important;
     }
@@ -31,18 +43,24 @@
       display: none !important;
       width: 0 !important;
       height: 0 !important;
+      max-width: 0 !important;
+      max-height: 0 !important;
       background: transparent !important;
       -webkit-appearance: none !important;
     }
     ::-webkit-scrollbar-thumb,
     *::-webkit-scrollbar-thumb,
     ::-webkit-scrollbar-track,
-    *::-webkit-scrollbar-track {
+    *::-webkit-scrollbar-track,
+    ::-webkit-scrollbar-corner,
+    *::-webkit-scrollbar-corner {
       display: none !important;
       background: transparent !important;
+      width: 0 !important;
+      height: 0 !important;
     }
   </style>
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
   <!-- Magical Particles Background -->

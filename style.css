@@ -1671,60 +1671,6 @@ body::after {
   line-height: 1.6;
 }
 
-/* ----- Responsive ----- */
-@media (min-width: 480px) {
-  .header-title {
-    font-size: 1.7rem;
-  }
-
-  .guild-card-inner {
-    padding: var(--spacing-md);
-  }
-
-  .score-value {
-    font-size: 2.4rem;
-  }
-
-  .score-btn {
-    padding: 10px 6px;
-    font-size: 0.75rem;
-  }
-
-  .menu-logo {
-    width: 260px;
-    height: 260px;
-  }
-}
-
-@media (min-width: 768px) {
-  .guilds-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .header-title {
-    font-size: 2rem;
-  }
-
-  .menu-logo {
-    width: 300px;
-    height: 300px;
-  }
-
-  .menu-nav {
-    max-width: 440px;
-  }
-}
-
-@media (min-width: 1024px) {
-  .guilds-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
-  .main-content {
-    max-width: 900px;
-  }
-}
-
 /* ============================================
    RESPONSIVE DESIGN & MULTI-DEVICE OPTIMIZATIONS
    ============================================ */

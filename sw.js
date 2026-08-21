@@ -3,7 +3,7 @@
    Service Worker (Offline Cache & PWA Support)
    ============================================ */
 
-const CACHE_NAME = 'torneio-guildas-v5';
+const CACHE_NAME = 'torneio-guildas-v6';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -31,20 +31,23 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Activate event: Clean up old caches
+// Activate event: Clean up old caches immediately
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames
           .filter((name) => name !== CACHE_NAME)
-          .map((name) => caches.delete(name))
+          .map((name) => {
+            console.log('[SW] Deleting obsolete cache:', name);
+            return caches.delete(name);
+          })
       );
     }).then(() => self.clients.claim())
   );
 });
 
-// Fetch event: Stale-While-Revalidate Strategy
+// Fetch event: Network-First Strategy with Cache Fallback
 self.addEventListener('fetch', (event) => {
   // Only handle GET requests
   if (event.request.method !== 'GET') return;
@@ -53,22 +56,19 @@ self.addEventListener('fetch', (event) => {
   if (!event.request.url.startsWith('http')) return;
 
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      const fetchPromise = fetch(event.request)
-        .then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
-          }
-          return networkResponse;
-        })
-        .catch(() => {
-          // If offline and request fails, cachedResponse will be returned
-        });
-
-      return cachedResponse || fetchPromise;
-    })
+    fetch(event.request)
+      .then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
+        }
+        return networkResponse;
+      })
+      .catch(() => {
+        // If network fails (offline), fallback to cache
+        return caches.match(event.request);
+      })
   );
 });

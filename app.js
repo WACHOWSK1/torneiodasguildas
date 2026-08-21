@@ -909,6 +909,7 @@ function init() {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js').then(reg => {
         console.log('[SW] ServiceWorker registrado com sucesso:', reg.scope);
+        reg.update();
       }).catch(err => {
         console.warn('[SW] Falha ao registrar ServiceWorker:', err);
       });
