@@ -2721,3 +2721,66 @@ body.light-theme .music-playlist-item.active {
   font-weight: bold;
 }
 
+/* ============================================
+   MOBILE RESPONSIVE: QUICK CONTROLS (BOTTOM RIGHT)
+   ============================================ */
+@media (max-width: 768px) {
+  .top-quick-bar {
+    top: auto;
+    bottom: 16px;
+    right: 16px;
+  }
+
+  @supports (padding: env(safe-area-inset-bottom)) {
+    .top-quick-bar {
+      bottom: max(16px, env(safe-area-inset-bottom));
+      right: max(16px, env(safe-area-inset-right));
+    }
+  }
+
+  .quick-btn-tooltip {
+    bottom: auto;
+    top: -34px;
+    transform: translateX(-50%) translateY(-4px);
+  }
+
+  .quick-btn:hover .quick-btn-tooltip {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .music-player-panel {
+    top: auto;
+    bottom: 74px;
+    right: 16px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    transform: translateY(10px) scale(0.96);
+  }
+
+  @supports (padding: env(safe-area-inset-bottom)) {
+    .music-player-panel {
+      bottom: max(74px, calc(env(safe-area-inset-bottom) + 58px));
+      right: max(16px, env(safe-area-inset-right));
+    }
+  }
+
+  .music-player-panel.active {
+    transform: translateY(0) scale(1);
+  }
+
+  .menu-container {
+    padding-bottom: 75px;
+  }
+
+  .main-content {
+    padding-bottom: 95px;
+  }
+
+  .start-page,
+  .credits-page,
+  .placeholder-page {
+    padding-bottom: 85px;
+  }
+}
+
+
