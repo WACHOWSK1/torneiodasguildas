@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="description" content="Torneio das Guildas dos Magos - Gerencie pontuações de guildas em um torneio de fantasia medieval">
+  <meta name="description" content="Torneio das Guildas dos Magos - Gincana Interdisciplinar Gamificada de Fantasia Medieval">
+  <meta property="og:title" content="Torneio das Guildas dos Magos">
+  <meta property="og:description" content="Gincana Interdisciplinar Gamificada - Gerencie pontuações, guildas e ranking em tempo real.">
+  <meta property="og:image" content="logo.jpg">
+  <meta property="og:type" content="website">
   <meta name="theme-color" content="#0d0d2b">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -32,11 +36,20 @@
       autoplay
       muted
       playsinline
+      webkit-playsinline
       preload="auto"
     >
       <source src="intro.mp4" type="video/mp4">
     </video>
-    <button class="splash-skip" id="splashSkip" aria-label="Pular introdução">Pular ➔</button>
+    <button class="splash-skip" id="splashSkip" title="Pular introdução">Pular Vídeo ›</button>
+    <script>
+      (function() {
+        var v = document.getElementById('splashVideo');
+        if (v) {
+          v.play().catch(function(){});
+        }
+      })();
+    </script>
   </div>
 
   <!-- =============================== -->

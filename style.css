@@ -820,14 +820,15 @@ body::after {
   z-index: 5;
   padding: var(--spacing-md);
   padding-bottom: 100px;
-  max-width: 600px;
+  max-width: 1320px;
+  width: 100%;
   margin: 0 auto;
 }
 
 /* ----- Guilds Grid ----- */
 .guilds-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-lg);
 }
@@ -1056,13 +1057,19 @@ body::after {
   text-align: center;
   margin: var(--spacing-sm) 0;
   position: relative;
+  min-height: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .score-value {
   font-family: var(--font-cinzel-decorative);
   font-size: 2rem;
   font-weight: 900;
-  background: linear-gradient(180deg, #fff 0%, var(--accent-light, var(--gold-light)) 100%);
+  color: var(--accent-light, #ffffff);
+  background: linear-gradient(180deg, #ffffff 0%, var(--accent-light, var(--gold-light)) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1086,6 +1093,7 @@ body::after {
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 2px;
+  display: block;
 }
 
 /* Score buttons */
@@ -1690,9 +1698,29 @@ body::after {
 }
 
 /* ============================================
-   SMARTPHONE UX & MOBILE-FIRST OPTIMIZATIONS
+   RESPONSIVE DESIGN & MULTI-DEVICE OPTIMIZATIONS
    ============================================ */
 
+/* ----- Custom Scrollbars for Desktop ----- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gold-dark);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold);
+}
+
+/* ----- Mobile Devices (< 600px) ----- */
 @media (max-width: 600px) {
   body {
     -webkit-text-size-adjust: 100%;
@@ -1745,7 +1773,6 @@ body::after {
     gap: 14px;
   }
 
-  /* On smaller phones, make score buttons touch targets larger */
   .guild-card-inner {
     padding: 16px 12px 12px;
   }
@@ -1813,8 +1840,8 @@ body::after {
   }
 }
 
-/* Medium smartphones (481px to 767px) - 2 columns grid */
-@media (min-width: 481px) and (max-width: 767px) {
+/* Medium smartphones (481px to 600px) - 2 columns grid */
+@media (min-width: 481px) and (max-width: 600px) {
   .guilds-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
@@ -1823,6 +1850,74 @@ body::after {
   .score-btn {
     padding: 9px 4px;
     font-size: 0.72rem;
+  }
+}
+
+/* Tablets & Medium Screens (601px to 1024px) */
+@media (min-width: 601px) and (max-width: 1024px) {
+  .main-content {
+    padding: 20px 24px 100px;
+    max-width: 960px;
+  }
+
+  .guilds-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  .menu-container {
+    padding: 40px 24px;
+  }
+
+  .ranking-section {
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .add-guild-btn {
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* Desktop & Large Displays / Projectors (> 1024px) */
+@media (min-width: 1025px) {
+  .main-content {
+    max-width: 1360px;
+    padding: 28px 40px 120px;
+  }
+
+  .guilds-grid {
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 20px;
+  }
+
+  .ranking-section {
+    max-width: 800px;
+    margin: 0 auto var(--spacing-lg);
+  }
+
+  .add-guild-btn {
+    max-width: 800px;
+    margin: 0 auto var(--spacing-lg);
+  }
+
+  .reset-container {
+    max-width: 800px;
+    margin: 0 auto var(--spacing-xl);
+  }
+
+  .placeholder-page,
+  .credits-page {
+    max-width: 700px;
+    padding-top: 50px;
+  }
+
+  .menu-container {
+    max-width: 480px;
+    margin: 0 auto;
   }
 }
 
@@ -1884,7 +1979,6 @@ body::after {
   }
 }
 
-
 /* ----- Utility ----- */
 .visually-hidden {
   position: absolute;
@@ -1903,14 +1997,23 @@ body::after {
   box-shadow: 0 0 25px var(--accent-glow, var(--gold-glow));
 }
 
-/* Subtle card hover/interaction state */
+/* Rich hover state for desktop with mouse */
 @media (hover: hover) {
   .guild-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
   }
 
   .guild-card.is-leader:hover {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 25px var(--gold-glow);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 0 30px var(--gold-glow);
+  }
+
+  .score-btn:hover {
+    filter: brightness(1.15);
+    transform: translateY(-1px);
+  }
+
+  .menu-btn:hover {
+    transform: translateY(-3px) scale(1.01);
   }
 }

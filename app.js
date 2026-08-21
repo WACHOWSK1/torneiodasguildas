@@ -173,6 +173,22 @@ function saveState() {
   }
 }
 
+function sanitizeGuild(g, index) {
+  if (typeof g.score !== 'number' || isNaN(g.score)) g.score = 0;
+  if (!Array.isArray(g.history)) g.history = [];
+  
+  const presetIndex = typeof g.presetIndex === 'number' && g.presetIndex >= 0 ? g.presetIndex : (index % GUILD_PRESETS.length);
+  const preset = GUILD_PRESETS[presetIndex] || GUILD_PRESETS[0];
+
+  g.presetIndex = presetIndex;
+  g.name = g.name || preset.name;
+  g.icon = g.icon || preset.icon;
+  g.color = g.color || preset.color;
+  g.colorLight = g.colorLight || preset.colorLight;
+  g.colorDark = g.colorDark || preset.colorDark;
+  return g;
+}
+
 function loadState() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -180,10 +196,7 @@ function loadState() {
       const parsed = JSON.parse(saved);
       if (parsed && Array.isArray(parsed.guilds)) {
         state = parsed;
-        // Ensure history arrays exist
-        state.guilds.forEach(g => {
-          if (!Array.isArray(g.history)) g.history = [];
-        });
+        state.guilds = state.guilds.map((g, i) => sanitizeGuild(g, i));
         return true;
       }
     }
@@ -845,8 +858,9 @@ const splashVideo = document.getElementById('splashVideo');
 const splashSkip = document.getElementById('splashSkip');
 
 function dismissSplash() {
+  if (!splashScreen || splashScreen.style.display === 'none') return;
   splashScreen.classList.remove('active');
-  try { splashVideo.pause(); } catch(e){}
+  try { if (splashVideo) splashVideo.pause(); } catch(e){}
 
   // After fade-out transition, remove from DOM
   setTimeout(() => {
@@ -861,25 +875,28 @@ function dismissSplash() {
 }
 
 // When video ends naturally, dismiss the splash
-splashVideo.addEventListener('ended', dismissSplash);
+if (splashVideo) {
+  splashVideo.addEventListener('ended', dismissSplash);
 
-// Skip button click
-if (splashSkip) {
-  splashSkip.addEventListener('click', dismissSplash);
+  // Fallback: if video fails to load or play, auto-dismiss after 1 second
+  splashVideo.addEventListener('error', () => {
+    setTimeout(dismissSplash, 1000);
+  });
 }
 
-// Tap/click anywhere on video to skip too (optional, for mobile convenience)
-splashVideo.addEventListener('click', () => {
-  // Only allow skipping after 2 seconds
-  if (splashVideo.currentTime > 2) {
+// Skip button and click on splash screen
+if (splashSkip) {
+  splashSkip.addEventListener('click', (e) => {
+    e.stopPropagation();
     dismissSplash();
-  }
-});
+  });
+}
 
-// Fallback: if video fails to load, auto-dismiss after 1 second
-splashVideo.addEventListener('error', () => {
-  setTimeout(dismissSplash, 1000);
-});
+if (splashScreen) {
+  splashScreen.addEventListener('click', () => {
+    dismissSplash();
+  });
+}
 
 // ----- Initialize -----
 function init() {
@@ -903,8 +920,10 @@ function init() {
     removeBlackBackground(logo);
   });
 
-  // Check if intro video is present and play it
-  if (splashVideo) {
+  // Check if intro video is present and play it (or skip if already shown in this session)
+  if (sessionStorage.getItem('intro_shown') === '1') {
+    dismissSplash();
+  } else if (splashVideo) {
     splashVideo.play().catch(() => {
       // Autoplay blocked or failed, fallback to dismiss
       setTimeout(dismissSplash, 1000);

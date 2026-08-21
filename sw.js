@@ -3,7 +3,7 @@
    Service Worker (Offline Cache & PWA Support)
    ============================================ */
 
-const CACHE_NAME = 'torneio-guildas-v2';
+const CACHE_NAME = 'torneio-guildas-v3';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -16,7 +16,9 @@ const STATIC_ASSETS = [
   './sponsor1.png',
   './sponsor2.png',
   './public/favicon.svg',
-  './public/icons.svg'
+  './public/icons.svg',
+  './public/icon-192.png',
+  './public/icon-512.png'
 ];
 
 // Install event: Pre-cache static assets
