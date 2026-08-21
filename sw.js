@@ -3,7 +3,7 @@
    Service Worker (Offline Cache & PWA Support)
    ============================================ */
 
-const CACHE_NAME = 'torneio-guildas-v3';
+const CACHE_NAME = 'torneio-guildas-v5';
 const STATIC_ASSETS = [
   './',
   './index.html',

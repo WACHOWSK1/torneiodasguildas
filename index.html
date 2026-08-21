@@ -17,10 +17,32 @@
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="public/favicon.svg">
   <link rel="icon" type="image/svg+xml" href="public/favicon.svg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=MedievalSharp&family=Cinzel+Decorative:wght@400;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Force hide scrollbars across Chrome, Safari, Edge, Firefox */
+    html, body, * {
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+    }
+    ::-webkit-scrollbar,
+    *::-webkit-scrollbar,
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+      background: transparent !important;
+      -webkit-appearance: none !important;
+    }
+    ::-webkit-scrollbar-thumb,
+    *::-webkit-scrollbar-thumb,
+    ::-webkit-scrollbar-track,
+    *::-webkit-scrollbar-track {
+      display: none !important;
+      background: transparent !important;
+    }
+  </style>
+  <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
   <!-- Magical Particles Background -->
