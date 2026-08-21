@@ -177,11 +177,28 @@ function removeBlackBackground(imgElement) {
   };
 }
 
-// ----- Page Navigation -----
-function navigateTo(pageName) {
+// ----- Page Navigation & History (Smartphone Back Button Support) -----
+let currentPage = 'menu';
+
+function navigateTo(pageName, pushHistory = true) {
+  if (!allPages[pageName]) pageName = 'menu';
+
+  currentPage = pageName;
+
+  // Close open modals or music panel if open
+  if (musicPlayerPanel && musicPlayerPanel.classList.contains('active')) {
+    musicPlayerInstance?.closePanel();
+  }
+  if (modalOverlay && modalOverlay.classList.contains('active')) {
+    hideModal();
+  }
+  if (editNameModalOverlay && editNameModalOverlay.classList.contains('active')) {
+    hideEditNameModal();
+  }
+
   // Hide all pages
   Object.values(allPages).forEach(page => {
-    page.classList.remove('active');
+    if (page) page.classList.remove('active');
   });
 
   // Show target page
@@ -192,7 +209,40 @@ function navigateTo(pageName) {
 
   // Scroll to top
   window.scrollTo(0, 0);
+
+  // Update browser history for native mobile back button
+  if (pushHistory) {
+    const hash = pageName === 'menu' ? '' : `#${pageName}`;
+    const newUrl = window.location.pathname + hash;
+    if (window.location.hash !== hash) {
+      history.pushState({ page: pageName }, '', newUrl);
+    }
+  }
 }
+
+// Smartphone & Browser Back/Forward Button Event Listener
+window.addEventListener('popstate', (event) => {
+  // Priority 1: Close active modals if open
+  if (modalOverlay && modalOverlay.classList.contains('active')) {
+    hideModal();
+    return;
+  }
+  if (editNameModalOverlay && editNameModalOverlay.classList.contains('active')) {
+    hideEditNameModal();
+    return;
+  }
+
+  // Priority 2: Close active music panel if open
+  if (musicPlayerPanel && musicPlayerPanel.classList.contains('active')) {
+    musicPlayerInstance?.closePanel();
+    return;
+  }
+
+  // Priority 3: Navigate back to the previous screen
+  const targetPage = (event.state && event.state.page) || (window.location.hash ? window.location.hash.replace('#', '') : 'menu');
+  playArcaneSound('undo');
+  navigateTo(targetPage, false);
+});
 
 // ----- Local Storage -----
 const STORAGE_KEY = 'torneio_guildas_state';
@@ -1390,9 +1440,22 @@ function init() {
   updateSfxButtonUI();
   musicPlayerInstance = new MedievalMusicPlayer();
 
+  // Initialize native history state for smartphone back button
+  if (!history.state) {
+    history.replaceState({ page: 'menu' }, '', window.location.pathname);
+  }
+
   loadState();
   createBackgroundParticles();
   render();
+
+  // If page loaded with a specific hash (e.g. #tournament or #start)
+  if (window.location.hash) {
+    const initialPage = window.location.hash.replace('#', '');
+    if (allPages[initialPage]) {
+      navigateTo(initialPage, false);
+    }
+  }
 
   // Register Service Worker for PWA Offline capability
   if ('serviceWorker' in navigator) {
